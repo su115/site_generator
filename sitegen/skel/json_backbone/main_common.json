@@ -1,0 +1,25 @@
+[
+  {
+    "block_name": "aa_main",
+    "content_type": "common",
+    "content_lang": "en",
+    "content": {
+        "title_data": "Welcome to Sitegen",
+        "foter_data": "Built for what's next."
+    },
+    "inline_blocks": ["bb_block","cc_block"]
+  },
+  {
+    "block_name": "bb_block",
+    "content_type": "common",
+    "content_lang": "en",
+    "content": {}
+  },
+  {
+    "block_name": "cc_block",
+    "content_type": "common",
+    "content_lang": "en",
+    "content": {}
+  }
+
+]

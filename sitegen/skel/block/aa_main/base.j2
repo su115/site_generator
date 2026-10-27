@@ -1,0 +1,39 @@
+
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#09090b">
+  <title>{{ content.title_data }}</title>
+
+  <style>
+    {{ text_css }}    
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    {{ inline_blocks.get("bb_block_part1","") | safe | indent }}
+
+    {{ inline_blocks.get("cc_block","") | safe | indent }}
+    
+    {{ inline_blocks.get("bb_block_part2","") | safe | indent }}
+
+
+    <footer>
+      Powered by <strong>Sitegen</strong> ·
+      <span id="year"></span>
+      <br>
+        {{ content.foter_data }}
+    </footer>
+  </main>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    {{ text_js }}
+  </script>
+</body>
+</html>
+

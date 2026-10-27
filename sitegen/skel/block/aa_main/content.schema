@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "properties": {
+    "title_data": {
+      "type": "string"
+    },
+    "foter_data": {
+      "type": "string"
+    }
+  },
+  "required": ["foter_data","title_data"],
+  "additionalProperties": false
+}

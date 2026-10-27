@@ -1,0 +1,50 @@
+
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Application Configuration",
+  "type": "object",
+  "properties": {
+    "json_directory": {
+      "type": "string",
+      "minLength": 1
+    },
+    "block_directory": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sites_directory": {
+      "type": "string",
+      "minLength": 1
+    },
+    "block_entrypoint": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sites": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lang": {
+            "type": "string"
+          }
+        },
+        "required": ["name", "lang"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "json_directory",
+    "block_directory",
+    "sites_directory",
+    "block_entrypoint",
+    "sites"
+  ],
+  "additionalProperties": false
+}
+

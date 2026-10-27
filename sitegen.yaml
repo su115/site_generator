@@ -1,0 +1,9 @@
+json_directory: "./json_backbone"
+block_directory: "./blocks"
+sites_directory:  "./sites"
+
+block_entrypoint: aa_main
+sites:
+    - name: example
+      lang: en
+

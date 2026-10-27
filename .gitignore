@@ -1,0 +1,12 @@
+blocks/**
+json_backbone/**
+sites/**
+
+**/__pycache__/
+**/.pytest_cache/
+**/.ruff_cache/
+**/.mypy_cache/
+**/.coverage
+htmlcov/
+python_environment/
+dist/
