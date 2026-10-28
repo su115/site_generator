@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import typer
 
-from sitegen.core.cli_core3 import Controller, main
+from sitegen.core.cli_core3 import Controller
 from sitegen.m404 import generate_404
 
 app = typer.Typer(
@@ -16,12 +16,10 @@ app = typer.Typer(
     rich_markup_mode="rich",
 )
 
-C = Controller()
-C.load_config()
-
 
 def get_sites() -> list[dict[str, str]]:
-    return C.sites
+    cont = Controller().load_config()
+    return cont.sites
 
 
 def complete_site(incomplete: str) -> list[str]:
@@ -55,7 +53,7 @@ def build(
     site: str = typer.Argument(..., autocompletion=complete_site),
     lang: str = typer.Argument(..., autocompletion=complete_lang),
 ) -> None:
-    main(site, lang)
+    Controller().load_config().build(site_name=site, lang=lang)
     print("Building ...")
     generate_404()
 
@@ -65,20 +63,14 @@ def build(
 )
 def regenerate() -> None:
     print("Regenerating...")
-    msg = ""
-    for item in get_sites():
-        site_name = item["site_name"]
-        lang = item["lang"]
-        main(site_name, lang)
-        msg += f"Site: {str(site_name).ljust(30)} {lang} regenerated.\n"
-    print(msg)
+    Controller().load_config().regenerate()
     generate_404()
 
 
 @app.command(help=("Initialize basic framewaork files."))
 def init() -> None:
     print("Initializing...")
-    C.initialize_skeleton()
+    Controller().initialize_skeleton()
 
 
 if __name__ == "__main__":

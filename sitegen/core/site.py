@@ -110,22 +110,18 @@ class Site:
 
     def _sort_order_by_dependecies(self, root_name: str, blocks: list[Block]) -> list[Block]:
         graph = {b.block_name: b.inline_blocks for b in blocks}
-        visited = set()
         temp = set()
         result = []
 
         def dfs(node: str) -> None:
             if node in temp:
                 raise ValueError(f"Cycle detected at {node}")
-            if node in visited:
-                return
             temp.add(node)
             for dep in graph.get(node, []):
                 if dep not in graph:
                     raise ValueError(f"Dependecy {dep} is not part of dependecy tree!")
                 dfs(node=dep)
             temp.remove(node)
-            visited.add(node)
             result.append(node)
 
         dfs(root_name)

@@ -36,12 +36,26 @@ class Collector:
                 block_list.append(block)
         return block_list
 
+    @classmethod
+    def collect_assets(cls, blocks: list[Block], block_dir: Path) -> dict[str, str]:
+        text_css = ""
+        text_js = ""
+        for block in blocks:
+            css_file = self.block_dir / block.block_name / "base.css"
+            if css_file.exists():
+                text_css += "\n" + css_file.read_text(encoding="utf-8")
+            js_file = self.block_dir / block.block_name / "base.js"
+            if js_file.exists():
+                text_js += "\n" + js_file.read_text(encoding="utf-8")
+        return {
+            "block_css": text_css,
+            "block_js": text_js,
+        }
+
 
 class Jinja2Parser:
-    def __init__(self, site: Site, block_dir: Path) -> None:
-        self.site = site
+    def __init__(self, block_dir: Path) -> None:
         self.block_dir = block_dir
-        self.blocks_dict: dict[str, str] = {}
         self.text_css: str = ""
         self.text_js: str = ""
 
@@ -50,14 +64,6 @@ class Jinja2Parser:
         sc = SchemaValidator(3)
         sc.verify_json_by_path(schema_path, block.content.get_content_dict())
         print(f"Validate {schema_path}.")
-
-    def _load_assets(self, block: Block) -> None:
-        css_file = self.block_dir / block.block_name / "base.css"
-        if css_file.exists():
-            self.text_css += "\n" + css_file.read_text(encoding="utf-8")
-        js_file = self.block_dir / block.block_name / "base.js"
-        if js_file.exists():
-            self.text_js += "\n" + js_file.read_text(encoding="utf-8")
 
     def _get_template(self, block: Block) -> Template:
         env = Environment(
@@ -69,26 +75,23 @@ class Jinja2Parser:
         template_path = Path(block.block_name) / "base.j2"
         return env.get_template(str(template_path))
 
-    def parse_block(self, block: Block) -> None:
+    def parse_block(self, block: Block, site_name: str, inline_blocks: dict[str, str]) -> dict[str, str]:
         self._validate_block(block)
 
         print(f"Parse block: {block.block_name!r} ...", end="")
         template = self._get_template(block)
-        self._load_assets(block)
 
         template_dictionary = {
             "content": block.content,
-            "site_name": self.site.site_name,
-            "inline_blocks": self.blocks_dict.copy(),
-            "text_css": self.text_css,
-            "text_js": self.text_js,
+            "site_name": site_name,
+            "inline_blocks": inline_blocks.copy(),
         }
         result = template.render(**template_dictionary)
 
-        self.blocks_dict.update(self.split_content(block.block_name, result))
         print(" [OK]")
+        return self._split_content(block.block_name, result)
 
-    def split_content(self, block_name: str, data: str) -> dict[str, str]:
+    def _split_content(self, block_name: str, data: str) -> dict[str, str]:
         splited_data = data.split("<!-- SPLIT -->")
         if len(splited_data) == 1:
             return {block_name: data}
@@ -96,11 +99,6 @@ class Jinja2Parser:
         for number, part in enumerate(splited_data):
             result[f"{block_name}_part{number + 1}"] = part
         return result
-
-    def parse_site(self) -> str:
-        for block in self.site.blocks:
-            self.parse_block(block)
-        return self.blocks_dict[self.site.root_name]
 
 
 BASE_PATH = Path(__file__).resolve().parent.parent
@@ -121,7 +119,7 @@ class Controller:
     def sites(self) -> list[dict[str, str]]:
         return copy.deepcopy(self._sites)
 
-    def load_config(self) -> None:
+    def load_config(self) -> Controller:
         config_path = Path(self.config_file)
         if not config_path.exists():
             raise ValueError(f"Config {self.config_file} not found!")
@@ -139,18 +137,22 @@ class Controller:
         self.sites_directory = Path(config_yaml["sites_directory"])
 
         self._sites = [{"site_name": s["name"], "lang": s["lang"]} for s in config_yaml["sites"]]
+        return self
 
     def initialize_skeleton(self) -> None:
+        config_file = Path(self.config_file)
+        if not config_file.is_file():
+            print(f"Config file not found {str(config_file)!r}!")
+            shutil.copy(BASE_PATH / "skel/sitegen.yaml", config_file)
+            print("Config file was generated!")
+
+        self.load_config()
         if self.json_directory.exists() or self.block_directory.exists() or self.sites_directory.exists():
             msg = f"""Please cleanup environment!
 {str(self.json_directory)!r} or {str(self.block_directory)!r} or {str(self.sites_directory)!r} exists!
 """
             raise ValueError(msg)
 
-        main_config = BASE_PATH / 'skel/sitegen.yaml'
-        if main_config.is_file():
-            msg = f"Config file exists {str(main_config) !r}"
-            raise ValueError(msg)
         self.json_directory.mkdir(exist_ok=True, parents=True)
         self.block_directory.mkdir(exist_ok=True, parents=True)
         self.sites_directory.mkdir(exist_ok=True, parents=True)
@@ -158,28 +160,35 @@ class Controller:
         shutil.copytree(BASE_PATH / "skel/block", self.block_directory, dirs_exist_ok=True)
         shutil.copytree(BASE_PATH / "skel/json_backbone", self.json_directory, dirs_exist_ok=True)
 
+    def build(self, site_name: str, lang: str) -> None:
+        if {"site_name": site_name, "lang": lang} not in self.sites:
+            msg = f"Site {site_name!r} with lang {lang!r} is not supported!"
+            raise ValueError(msg)
 
-def main(
-    site_name: str,
-    lang: str,
-) -> None:
-    c = Controller()
-    c.load_config()
+        blocks = Collector.collect_blocks(self.json_directory)
 
-    if {"site_name": site_name, "lang": lang} not in c.sites:
-        msg = f"Site {site_name!r} with lang {lang!r} is not supported!"
-        raise ValueError(msg)
+        site = Site(site_name, lang, root_name=self.entrypoint)
+        site.setup_blocks(blocks)
 
-    blocks = Collector.collect_blocks(c.json_directory)
+        # parse logic
+        block_dict: dict[str, str] = Collector.collect_assets(block_dir=self.block_directory, blocks=list(site.blocks))
+        parser = Jinja2Parser(block_dir=self.block_directory)
+        for block in site.blocks:
+            block_dict.update(parser.parse_block(block=block, site_name=site_name, inline_blocks=block_dict.copy()))
+        file_content = block_dict[self.entrypoint]
 
-    site = Site(site_name, lang, root_name=c.entrypoint)
-    site.setup_blocks(blocks)
+        site_file = self.sites_directory / f"{site_name}_{lang}.html"
+        site_file.write_text(file_content)
 
-    parser = Jinja2Parser(site=site, block_dir=c.block_directory)
-    file_content = parser.parse_site()
-
-    site_file = c.sites_directory / f"{site_name}_{lang}.html"
-    site_file.write_text(file_content)
+    def regenerate(self) -> None:
+        print("Regenerating...")
+        msg = ""
+        for site in self.sites:
+            site_name = site["site_name"]
+            lang = site["lang"]
+            self.build(site_name=site_name, lang=lang)
+            msg += f"Site: {str(site_name).ljust(30)} {lang} regenerated.\n"
+        print(msg)
 
 
 if __name__ == "__main__":  # pragma: no cover
@@ -187,8 +196,11 @@ if __name__ == "__main__":  # pragma: no cover
 
     print(sys.argv)
     if len(sys.argv) == 3:
-        name = sys.argv[1]
+        sname = sys.argv[1]
         lang = sys.argv[2]
-        main(name, lang)
+
+        c = Controller()
+        c.load_config()
+        c.build(sname, lang)
     else:
         print("Example: python3 sitegen/core/cli_core3.py example en")
