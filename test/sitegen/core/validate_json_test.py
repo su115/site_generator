@@ -1,6 +1,7 @@
 from unittest import TestCase
+
 from parameterized import parameterized
-from sitegen.core.validate_json import DFS as DFS
+from sitegen.core.validate_json import DFS
 
 PATH = "sitegen.core.validate_json"
 

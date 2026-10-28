@@ -1,12 +1,14 @@
+from __future__ import annotations
+
 import json
-from typing import Any
-from typing import List, Union
 from pathlib import Path
+from typing import Any
+
 from jsonschema import Draft202012Validator
 
 
 class DFS:
-    def __init__(self, target_path: List[str], debug: bool = False) -> None:
+    def __init__(self, target_path: list[str], debug: bool = False) -> None:
         self.found: bool = False
         self.value: Any
         self.line_number = 0
@@ -18,7 +20,7 @@ class DFS:
         if not self.target_path:
             raise ValueError("Target path cant be empty!")
 
-    def _walk(self, data: Any, current_path: List[Union[str, int]]) -> int:
+    def _walk(self, data: Any, current_path: list[str | int]) -> int:
         if self.found:
             return self.line_number
 
@@ -49,7 +51,7 @@ class DFS:
 
 
 class SchemaError(Exception):
-    def __init__(self, message: str, validator: str, validator_value: str, instance: Any, path: List[str], data: Any) -> None:
+    def __init__(self, message: str, validator: str, validator_value: str, instance: Any, path: list[str], data: Any) -> None:
         super().__init__(message)
         self._message = message
         self._validator = validator
@@ -68,7 +70,7 @@ class SchemaError(Exception):
         return dfs.path_to_number(self.data)
 
     @property
-    def path(self) -> List[str]:
+    def path(self) -> list[str]:
         return self._path.copy()
 
     @property

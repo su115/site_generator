@@ -1,7 +1,8 @@
 from __future__ import annotations
+
 import typer
-from typing import List, Dict
-from sitegen.core.cli_core3 import main, Controller
+
+from sitegen.core.cli_core3 import Controller, main
 from sitegen.m404 import generate_404
 
 app = typer.Typer(
@@ -19,16 +20,16 @@ C = Controller()
 C.load_config()
 
 
-def get_sites() -> List[Dict[str, str]]:
+def get_sites() -> list[dict[str, str]]:
     return C.sites
 
 
-def complete_site(incomplete: str) -> List[str]:
+def complete_site(incomplete: str) -> list[str]:
     sites = [k["site_name"] for k in get_sites()]
     return [site for site in sites if site.startswith(incomplete)]
 
 
-def complete_lang(ctx: typer.Context, incomplete: str) -> List[str]:
+def complete_lang(ctx: typer.Context, incomplete: str) -> list[str]:
     site = ctx.params.get("site")
 
     langs = [k["lang"] for k in get_sites() if k["site_name"] == site]
@@ -39,7 +40,7 @@ def complete_lang(ctx: typer.Context, incomplete: str) -> List[str]:
 
 @app.command(help="List available sites")
 def sites() -> None:
-    result: Dict[str, List[str]] = {}
+    result: dict[str, list[str]] = {}
     for item in get_sites():
         if item["site_name"] not in result:
             result[item["site_name"]] = []

@@ -1,13 +1,15 @@
 from __future__ import annotations
-from pathlib import Path
-from typing import List, Dict
+
 import copy
 import json
-import yaml
 import shutil
+from pathlib import Path
+
+import yaml
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, Template
+
+from sitegen.core.site import Block, Site
 from sitegen.core.validate_json import SchemaValidator
-from sitegen.core.site import Site, Block
 
 Lang = str
 ContentType = str
@@ -15,19 +17,19 @@ ContentType = str
 
 class Collector:
     @classmethod
-    def collect_blocks(cls, json_dir: Path) -> List[Block]:
+    def collect_blocks(cls, json_dir: Path) -> list[Block]:
         block_list = []
         for json_file in Path(json_dir).glob("*.json"):
             raw_json_data = json_file.read_text(encoding="utf-8")
             json_data = json.loads(raw_json_data)
             if not isinstance(json_data, list):
                 msg = f"Expected Block list, got: {type(json_data)}, {json_data}"
-                raise ValueError(msg)
+                raise TypeError(msg)
 
             for block_dict in json_data:
                 if not isinstance(block_dict, dict):
                     msg = f"Expected Block dictionary, got: {type(block_dict)}, {block_dict}"
-                    raise ValueError(msg)
+                    raise TypeError(msg)
 
                 block = Block()
                 block.setup_fields(**block_dict)
@@ -39,7 +41,7 @@ class Jinja2Parser:
     def __init__(self, site: Site, block_dir: Path) -> None:
         self.site = site
         self.block_dir = block_dir
-        self.blocks_dict: Dict[str, str] = {}
+        self.blocks_dict: dict[str, str] = {}
         self.text_css: str = ""
         self.text_js: str = ""
 
@@ -86,7 +88,7 @@ class Jinja2Parser:
         self.blocks_dict.update(self.split_content(block.block_name, result))
         print(" [OK]")
 
-    def split_content(self, block_name: str, data: str) -> Dict[str, str]:
+    def split_content(self, block_name: str, data: str) -> dict[str, str]:
         splited_data = data.split("<!-- SPLIT -->")
         if len(splited_data) == 1:
             return {block_name: data}
@@ -108,7 +110,7 @@ CONFIG_SCHEMA_PATH = BASE_PATH / "config_schema.json"
 class Controller:
     def __init__(self, config_file: str = "sitegen.yaml") -> None:
         self.config_file = config_file
-        self._sites: List[Dict[str, str]] = []
+        self._sites: list[dict[str, str]] = []
         self.entrypoint: str
 
         self.json_directory: Path
@@ -116,7 +118,7 @@ class Controller:
         self.sites_directory: Path
 
     @property
-    def sites(self) -> List[Dict[str, str]]:
+    def sites(self) -> list[dict[str, str]]:
         return copy.deepcopy(self._sites)
 
     def load_config(self) -> None:
@@ -143,6 +145,11 @@ class Controller:
             msg = f"""Please cleanup environment!
 {str(self.json_directory)!r} or {str(self.block_directory)!r} or {str(self.sites_directory)!r} exists!
 """
+            raise ValueError(msg)
+
+        main_config = BASE_PATH / 'skel/sitegen.yaml'
+        if main_config.is_file():
+            msg = f"Config file exists {str(main_config) !r}"
             raise ValueError(msg)
         self.json_directory.mkdir(exist_ok=True, parents=True)
         self.block_directory.mkdir(exist_ok=True, parents=True)

@@ -1,7 +1,8 @@
 from __future__ import annotations
-from typing import List, Any, Dict, Tuple, Iterator
+
 import copy
 import json
+from typing import Any, Iterator
 
 Lang = str
 ContentType = str
@@ -9,9 +10,9 @@ ContentType = str
 
 class Content:
     def __init__(self) -> None:
-        self._kwargs: Dict[str, Any]
+        self._kwargs: dict[str, Any]
 
-    def setup_fields(self, **kwargs: Dict[str, Any]) -> Content:
+    def setup_fields(self, **kwargs: dict[str, Any]) -> Content:
         self.__dict__["_kwargs"] = kwargs
         for key, value in self._kwargs.items():
             self.__dict__[key] = self._value_instantiation(value)
@@ -44,17 +45,17 @@ class Content:
     def has_attr(self, attr: str) -> bool:
         return hasattr(self, attr)
 
-    def items(self) -> Iterator[Tuple[str, Any]]:
-        for key in self._kwargs.keys():
+    def items(self) -> Iterator[tuple[str, Any]]:
+        for key in self._kwargs:
             yield key, self.__dict__[key]
 
-    def get_content_dict(self) -> Dict[str, Any]:
+    def get_content_dict(self) -> dict[str, Any]:
         return copy.deepcopy(self._kwargs)
 
 
 class Block(Content):
     def __init__(self) -> None:
-        self.inline_blocks: List[str]
+        self.inline_blocks: list[str]
         self.splited: bool
         self.block_name: str
         self.content_type: ContentType
@@ -74,7 +75,7 @@ class Block(Content):
 
 class Site:
     def __init__(self, site_name: str, lang: Lang, root_name: str) -> None:
-        self._blocks: List[Block] = []
+        self._blocks: list[Block] = []
         self.site_name = site_name
         self.lang = lang
         self._root_name = root_name
@@ -85,10 +86,9 @@ class Site:
 
     @property
     def blocks(self) -> Iterator[Block]:
-        for block in self._blocks:
-            yield block
+        yield from self._blocks
 
-    def setup_blocks(self, all_blocks: List[Block]) -> None:
+    def setup_blocks(self, all_blocks: list[Block]) -> None:
         langs = ["common", self.lang]
         same_lang_blocks = [b for b in all_blocks if b.content_lang in langs]
 
@@ -99,7 +99,7 @@ class Site:
 
         self._blocks = self._sort_order_by_dependecies(self.root_name, same_site_blocks)
 
-    def _check_block_names(self, blocks: List[Block]) -> None:
+    def _check_block_names(self, blocks: list[Block]) -> None:
         names = {}
         for block in blocks:
             if block.block_name in names:
@@ -108,7 +108,7 @@ class Site:
 
             names[block.block_name] = block
 
-    def _sort_order_by_dependecies(self, root_name: str, blocks: List[Block]) -> List[Block]:
+    def _sort_order_by_dependecies(self, root_name: str, blocks: list[Block]) -> list[Block]:
         graph = {b.block_name: b.inline_blocks for b in blocks}
         visited = set()
         temp = set()

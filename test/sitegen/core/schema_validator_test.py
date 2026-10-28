@@ -1,6 +1,7 @@
 from unittest import TestCase
 from unittest.mock import Mock
-from sitegen.core.validate_json import SchemaValidator, SchemaError
+
+from sitegen.core.validate_json import SchemaError, SchemaValidator
 
 PATH = "sitegen.core.validate_json"
 

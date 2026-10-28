@@ -1,6 +1,7 @@
 from unittest import TestCase
 from unittest.mock import patch
-from sitegen.core.site import Site, Block
+
+from sitegen.core.site import Block, Site
 
 PATH = "sitegen.core.site"
 

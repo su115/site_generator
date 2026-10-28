@@ -10,3 +10,6 @@ sites/**
 htmlcov/
 python_environment/
 dist/
+
+
+404.html

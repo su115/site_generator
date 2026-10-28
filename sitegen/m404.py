@@ -1,5 +1,5 @@
-from pathlib import Path
 import shutil
+from pathlib import Path
 
 SITES_DIR = Path("sites")
 OUTPUT_FILE = Path("404.html")

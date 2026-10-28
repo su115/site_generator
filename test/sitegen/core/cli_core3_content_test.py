@@ -1,6 +1,6 @@
 from unittest import TestCase
-from sitegen.core.site import Content, Block
 
+from sitegen.core.site import Block, Content
 
 PATH = "sitegen.core.site"
 
