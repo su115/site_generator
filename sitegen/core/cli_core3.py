@@ -19,7 +19,7 @@ class Collector:
     @classmethod
     def collect_blocks(cls, json_dir: Path) -> list[Block]:
         block_list = []
-        for json_file in Path(json_dir).glob("*.json"):
+        for json_file in json_dir.glob("*.json"):
             raw_json_data = json_file.read_text(encoding="utf-8")
             json_data = json.loads(raw_json_data)
             if not isinstance(json_data, list):
@@ -37,16 +37,19 @@ class Collector:
         return block_list
 
     @classmethod
+    def _get_asset_content(cls, block_dir: Path, block_name: str, file: str) -> str:
+        asset_file = block_dir / block_name / file
+        if asset_file.exists():
+            return "\n" + asset_file.read_text(encoding="utf-8")
+        return ""
+
+    @classmethod
     def collect_assets(cls, blocks: list[Block], block_dir: Path) -> dict[str, str]:
         text_css = ""
         text_js = ""
         for block in blocks:
-            css_file = self.block_dir / block.block_name / "base.css"
-            if css_file.exists():
-                text_css += "\n" + css_file.read_text(encoding="utf-8")
-            js_file = self.block_dir / block.block_name / "base.js"
-            if js_file.exists():
-                text_js += "\n" + js_file.read_text(encoding="utf-8")
+            text_css = cls._get_asset_content(block_dir, block.block_name, "base.css")
+            text_js = cls._get_asset_content(block_dir, block.block_name, "base.js")
         return {
             "block_css": text_css,
             "block_js": text_js,
