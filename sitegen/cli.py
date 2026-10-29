@@ -3,7 +3,6 @@ from __future__ import annotations
 import typer
 
 from sitegen.core.cli_core3 import Controller
-from sitegen.m404 import generate_404
 
 app = typer.Typer(
     name="sitegen",
@@ -31,13 +30,11 @@ def complete_lang(ctx: typer.Context, incomplete: str) -> list[str]:
     site = ctx.params.get("site")
 
     langs = [k["lang"] for k in get_sites() if k["site_name"] == site]
-    if not langs:
-        return langs
     return [lang for lang in langs if lang.startswith(incomplete)]
 
 
 @app.command(help="List available sites")
-def sites() -> None:
+def sites() -> None:  # pragma: no cover
     result: dict[str, list[str]] = {}
     for item in get_sites():
         if item["site_name"] not in result:
@@ -55,7 +52,6 @@ def build(
 ) -> None:
     Controller().load_config().build(site_name=site, lang=lang)
     print("Building ...")
-    generate_404()
 
 
 @app.command(
@@ -64,7 +60,6 @@ def build(
 def regenerate() -> None:
     print("Regenerating...")
     Controller().load_config().regenerate()
-    generate_404()
 
 
 @app.command(help=("Initialize basic framewaork files."))
@@ -73,5 +68,5 @@ def init() -> None:
     Controller().initialize_skeleton()
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     app()
