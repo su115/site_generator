@@ -11,3 +11,10 @@ pip install poetry
 poetry install
 
 ```
+
+Other commands
+```sh
+alias tree='tree -I "python_environment|__pycache__"'
+
+tar cvf site.tar   --exclude="*/__pycache__"   --exclude="site_generator/python_environment/*" --exclude="**/.mypy_cache" --exclude="*/.pytest_cache" --exclude="*/.git" --exclude="*/.ruff_cache"  --exclude="site_generator/htmlcov" --exclude="site_generator/.coverage" site_generator/
+```
