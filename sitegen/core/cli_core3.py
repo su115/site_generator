@@ -59,8 +59,6 @@ class Collector:
 class Jinja2Parser:
     def __init__(self, block_dir: Path) -> None:
         self.block_dir = block_dir
-        self.text_css: str = ""
-        self.text_js: str = ""
 
     def _validate_block(self, block: Block) -> None:
         schema_path = self.block_dir / block.block_name / "content.schema"
