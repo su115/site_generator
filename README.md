@@ -1,7 +1,16 @@
 # Library for site generation
 
+# Install
+```sh
+# From master branch
+poetry add git+https://github.com/su115/site_generator.git#master
 
-# Environment setup
+# Install release v1.0.2
+poetry add git+https://github.com/su115/site_generator.git#v1.0.2
+
+```
+
+### Environment setup
 ```sh
 python3 -m venv python_environment
 source python_environment/bin/activate
@@ -12,7 +21,7 @@ poetry install
 
 ```
 
-Other commands
+### Other commands
 ```sh
 alias tree='tree -I "python_environment|__pycache__"'
 

@@ -1,5 +1,5 @@
 
-name: Release flow
+name: Release workflow
 on:
   push:
     tags:
