@@ -1,0 +1,39 @@
+
+name: Release flow
+on:
+  push:
+    tags:
+        "v*.*.*"
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download repo 
+        uses: actions/checkout@v4
+        
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+        
+      - name: Turn on cache
+        uses: actions/cache@v6
+        with:
+            path: ~/.cache/pypoetry
+            key: poetry-cache-${{ hashFiles('poetry.lock') }}
+        
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+      
+      - name: Poetry install packages
+        run: poetry install
+  
+      - name: Build artifact
+        run: poetry build
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: dist/*
+        env:
+          GITHUB_TOKEN: ${{  secrets.GITHUB_TOKEN }} 
