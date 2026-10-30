@@ -1,0 +1,41 @@
+
+name: Sitegen flow
+on:
+  push:
+    branches:
+      - master
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download repo 
+        uses: actions/checkout@v4
+    
+      - name: Setup Python
+        uses: actions/setup-python@v5
+    	with:
+    	  python-version: '3.11'
+    
+      - name: Turn on cache
+        uses: actions/cache@v6
+        with:
+	    path: ~/.cache/pypoetry
+	    key: poetry-cache-v1
+
+      - name: Install Poetry
+    	uses: snok/install-poetry@v1
+
+      - name: Check for code probles
+        run: poetry run ruff check
+
+      - name: Check types
+        run: poetry run mypy
+
+      - name: Run Tests
+        run: poetry run coverage run -m pytest 
+
+      - name: Check coverage
+        run: poetry run coverage report --fail-under=100
+
+
+
