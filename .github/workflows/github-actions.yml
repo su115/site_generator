@@ -24,7 +24,10 @@ jobs:
         
       - name: Install Poetry
         uses: snok/install-poetry@v1
-        
+      
+      - name: Poetry install packages
+        run: poetry install
+  
       - name: Check for code probles
         run: poetry run ruff check
         
