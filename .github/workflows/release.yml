@@ -5,8 +5,10 @@ on:
     tags:
        - "v*.*.*"
 jobs:
-  test:
+  release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Download repo 
         uses: actions/checkout@v4
