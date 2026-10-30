@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sitegen"
-version = "1.0.2"
+version = "1.0.3"
 description = "Simple site generator."
 authors = ["Ihor <ihor.prots.lviv@gmail.com>"]
 readme = "README.md"
