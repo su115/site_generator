@@ -3,7 +3,7 @@ name: Release flow
 on:
   push:
     tags:
-        "v*.*.*"
+       - "v*.*.*"
 jobs:
   test:
     runs-on: ubuntu-latest
