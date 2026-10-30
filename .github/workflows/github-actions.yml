@@ -20,7 +20,7 @@ jobs:
         uses: actions/cache@v6
         with:
             path: ~/.cache/pypoetry
-            key: poetry-cache-v1
+            key: poetry-cache-${{ hashFiles('poetry.lock') }}
         
       - name: Install Poetry
         uses: snok/install-poetry@v1
@@ -28,7 +28,7 @@ jobs:
       - name: Poetry install packages
         run: poetry install
   
-      - name: Check for code probles
+      - name: Check for code problems
         run: poetry run ruff check
         
       - name: Check types
@@ -39,6 +39,4 @@ jobs:
         
       - name: Check coverage
         run: poetry run coverage report --fail-under=100
-
-
 
